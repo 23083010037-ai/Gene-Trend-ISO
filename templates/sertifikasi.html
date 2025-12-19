@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+{% block title %}Sertifikasi{% endblock %}
+{% block header %}Data Sertifikasi{% endblock %}
+{% block content %}
+
+<button class="btn btn-warning mb-3 fw-semibold" onclick="openAdd()">
+  <i class="bi bi-plus-circle me-1"></i> Tambah Sertifikasi
+</button>
+
+<div class="table-responsive">
+  <table id="sertifikasiTable" class="table table-striped table-bordered align-middle">
+    <thead class="text-center">
+      <tr>
+        <th>Nama Perusahaan</th>
+        <th>Jenis ISO</th>
+        <th>No Cert</th>
+        <th>Bidang Usaha</th>
+        <th>Kota</th>
+        <th>Alamat</th>
+        <th>Status</th>
+        <th>Tgl Awal</th>
+        <th>Tgl Akhir</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for s in sertifikasi %}
+      <tr>
+        <td>{{ s[1] }}</td>
+        <td>{{ s[2] }}</td>
+        <td>{{ s[3] }}</td>
+        <td>{{ s[4] }}</td>
+        <td>{{ s[8] }}</td>
+        <td>{{ s[9] }}</td>
+
+        <td>
+          {% if s[5] == 'Active' %}
+          <span class="badge bg-success">Active</span>
+          {% else %}
+          <span class="badge bg-danger">Deactive</span>
+          {% endif %}
+        </td>
+
+        <td>{{ s[6] }}</td>
+        <td>{{ s[7] }}</td>
+
+        <td class="text-center">
+          <button class="btn btn-primary btn-sm me-1" onclick="openEdit({{ s[0] }})">
+            <i class="bi bi-pen"></i>
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSert({{ s[0] }})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sertifikasiForm">
+  <div class="offcanvas-header">
+    <h5 id="offcanvasLabel">Form Sertifikasi</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <form id="formSertifikasi">
+
+      <input type="hidden" id="id">
+
+      <div class="mb-3">
+        <label>Nama Perusahaan</label>
+        <input type="text" id="nama_client" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label>Jenis ISO</label>
+        <select id="jenis_iso" class="form-control">
+          <option value="">-- Pilih Jenis Iso --</option>
+          <option>ISO 9001</option>
+          <option>ISO 14001</option>
+          <option>ISO 45001</option>
+          <option>ISO 22000</option>
+          <option>ISO/IEC 27001</option>
+          <option>ISO 13485</option>
+          <option>IATF 16949</option>
+          <option>ISO/IEC 17025</option>
+          <option>ISO/IEC 20000-1</option>
+          <option>ISO/IEC/IEEE 12207</option>
+          <option>ISO/IEC 27701</option>
+          <option>ISO/IEC 42001</option>
+          <option>ISO/IEC 27017</option>
+          <option>FSSC 22000</option>
+          <option>GDP</option>
+          <option>GMP</option>
+          <option>HACCP</option>
+          <option>ISO 29990</option>
+          <option>ISO 37001</option>
+          <option>ISO 31000</option>
+          <option>ISO 20121</option>
+          <option>ISO 50001</option>
+          <option>SMK3</option>
+          <option>SNI</option>
+          <option>BRCGS</option>
+          <option>Halal</option>
+          <option>Sertifikasi Kosher</option>
+          <option>FSC/SVLK</option>
+          <option>FSA YUM</option>
+          <option>C-TPAT</option>
+          <option>Fair Trade</option>
+          <option>Organik</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>No Cert</label>
+        <input type="text" id="no_cert" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label>Jenis EA</label>
+        <select id="mc_type" class="form-control">
+          <option value="">-- Pilih Type --</option>
+          {% for t in mc_types %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>Kode EA</label>
+        <select id="mc_code" class="form-control">
+          <option value="">-- Pilih Kode --</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>Bidang Usaha</label>
+        <input type="text" id="bidang_usaha" class="form-control" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label>Kota</label>
+        <input type="text" id="kota" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label>Alamat</label>
+        <textarea id="alamat" class="form-control"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label>Tgl Awal</label>
+        <input type="date" id="tgl_awal" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label>Tgl Akhir</label>
+        <input type="date" id="tgl_akhir" class="form-control">
+      </div>
+
+      <button type="button" class="btn btn-success w-100" onclick="saveSertifikasi()">
+        <i class="bi bi-save me-1"></i> Simpan
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function () {
+
+    $("#sertifikasiTable").DataTable({
+        paging: true,
+        pageLength: 5,
+        searching: true,
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Cari sertifikasi..."
+        }
+    });
+
+    // ==========================
+    // LOAD KODE BERDASARKAN TIPE
+    // ==========================
+    $("#mc_type").change(function () {
+        let type = $(this).val();
+        $("#mc_code").html('<option value="">-- Pilih Kode --</option>');
+        $("#bidang_usaha").val("");
+
+        if (type) {
+            $.get("/sertifikasi/get_code_by_type/" + type, function (data) {
+
+                data.forEach(code => {
+                    $("#mc_code").append(
+                        `<option value="${code}">${code}</option>`
+                    );
+                });
+
+            });
+        }
+    });
+
+    // ==========================
+    // UPDATE BIDANG USAHA
+    // ==========================
+    $("#mc_code").change(function () {
+        let type = $("#mc_type").val();
+        let code = $("#mc_code").val();
+
+        if (type && code) {
+            $.get("/sertifikasi/get_description",
+                { mc_type: type, mc_code: code },
+                function (desc) {
+                    $("#bidang_usaha").val(desc);
+                }
+            );
+        }
+    });
+
+});
+
+
+// =========================
+// OPEN ADD
+// =========================
+function openAdd() {
+    $("#formSertifikasi")[0].reset();
+    $("#id").val("");
+    $("#mc_code").html('<option value="">-- Pilih Kode --</option>');
+    $("#bidang_usaha").val("");
+
+    $("#offcanvasLabel").text("Tambah Sertifikasi");
+    new bootstrap.Offcanvas(document.getElementById("sertifikasiForm")).show();
+}
+
+
+// =========================
+// OPEN EDIT
+// =========================
+function openEdit(id) {
+    $.get("/sertifikasi/get/" + id, function (data) {
+
+        $("#id").val(data.id);
+        $("#nama_client").val(data.nama_client);
+        $("#jenis_iso").val(data.jenis_iso);
+        $("#no_cert").val(data.no_cert);
+
+        $("#mc_type").val(data.mc_type);
+
+        // load kode berdasarkan type
+        $.get("/sertifikasi/get_code_by_type/" + data.mc_type, function (codes) {
+
+            let options = '<option value="">-- Pilih Kode --</option>';
+
+            codes.forEach(c => {
+                options += `<option value="${c}">${c}</option>`;
+            });
+
+            $("#mc_code").html(options);
+            $("#mc_code").val(data.mc_code);
+        });
+
+        $("#bidang_usaha").val(data.bidang_usaha);
+        $("#kota").val(data.kota);
+        $("#alamat").val(data.alamat);
+        $("#tgl_awal").val(data.tgl_awal);
+        $("#tgl_akhir").val(data.tgl_akhir);
+
+        new bootstrap.Offcanvas(document.getElementById("sertifikasiForm")).show();
+    });
+}
+
+
+// =========================
+// SAVE
+// =========================
+function saveSertifikasi() {
+
+    let formData = {
+        id: $("#id").val(),
+        nama_client: $("#nama_client").val(),
+        jenis_iso: $("#jenis_iso").val(),
+        no_cert: $("#no_cert").val(),
+        mc_type: $("#mc_type").val(),
+        mc_code: $("#mc_code").val(),
+        bidang_usaha: $("#bidang_usaha").val(),
+        kota: $("#kota").val(),
+        alamat: $("#alamat").val(),
+        tgl_awal: $("#tgl_awal").val(),
+        tgl_akhir: $("#tgl_akhir").val(),
+    };
+
+    $.ajax({
+        url: "/sertifikasi/save",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(formData),
+        success: function () {
+            Swal.fire("Berhasil!", "Data berhasil disimpan.", "success")
+            .then(() => location.reload());
+        }
+    });
+}
+
+
+// =========================
+// DELETE
+// =========================
+function deleteSert(id) {
+    Swal.fire({
+        title: "Yakin menghapus?",
+        text: "Data akan dihapus permanen!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal"
+    }).then(result => {
+
+        if (result.isConfirmed) {
+            $.post("/sertifikasi/delete/" + id, {}, function () {
+                Swal.fire("Terhapus!", "", "success")
+                .then(() => location.reload());
+            });
+        }
+
+    });
+}
+</script>
+
+
+{% endblock %}

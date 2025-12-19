@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+  /* General Look (Minion vibes!) */
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .card,
+  .stats-card {
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fffefb, #fffbe6);
+    box-shadow: 4px 4px 10px rgba(255, 230, 100, 0.25),
+      -2px -2px 8px rgba(255, 255, 255, 0.8);
+    transition: all 0.25s ease-in-out;
+  }
+
+  .stats-card:hover,
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 16px rgba(255, 221, 100, 0.3),
+      -3px -3px 10px rgba(255, 255, 255, 0.9);
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6c757d;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+
+  /* Colors */
+  .text-primary {
+    color: #2c90f1 !important;
+  }
+
+  .text-warning {
+    color: #f6b93b !important;
+  }
+
+  .text-success {
+    color: #3bb273 !important;
+  }
+
+  /* Stats Cards */
+  .stats-card {
+    text-align: center;
+    padding: 24px 18px;
+    border: 2px solid transparent;
+    background: linear-gradient(to bottom right, #fffce8, #e8f5ff);
+  }
+
+  .stats-card:hover {
+    background: linear-gradient(to bottom right, #fff7d1, #dff3ff);
+  }
+
+  /* Charts Area */
+  .card-body {
+    background: linear-gradient(135deg, #ffffff, #f8fbff);
+    border-radius: 16px;
+  }
+
+  .fw-bold.mb-3 {
+    color: #555;
+    font-weight: 700;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
+
+  .chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Growth Box */
+  .card-body .border {
+    border: 2px solid #ffe685 !important;
+    background: #fffef8;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .card-body .border:hover {
+    background: #fffbe0;
+    box-shadow: 0 3px 10px rgba(255, 240, 120, 0.3);
+  }
+
+  /* Button Style */
+  .btn-outline-primary {
+    border-color: #6ec5ff;
+    color: #2b89e2;
+    font-weight: 500;
+    border-radius: 10px;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #a8dcff;
+    color: #000;
+    border-color: #a8dcff;
+  }
+
+  /* Modal Styling */
+  .modal-content {
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    background: #fef7d1;
+    border-bottom: none;
+  }
+
+  .modal-title {
+    color: #555;
+    font-weight: 700;
+  }
+
+  /* Table Style */
+  .table {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table thead {
+    background-color: #fef2b8;
+  }
+
+  .table th {
+    color: #333;
+    font-weight: 600;
+  }
+
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fdfdf6;
+  }
+
+  /* Cute Hover */
+  .stats-card:hover .stat-value {
+    color: #ff77aa;
+    transition: color 0.3s ease;
+  }
+
+  /* DARK MODE (lama – tetap dibiarkan, tidak dihapus) */
+  [data-theme="dark"] .stats-card,
+  [data-theme="dark"] .card {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    color: #fff;
+    box-shadow: 4px 4px 12px rgba(255, 255, 255, 0.05);
+  }
+
+  [data-theme="dark"] .table thead {
+    background-color: #333;
+  }
+
+  [data-theme="dark"] .btn-outline-primary {
+    color: #87cefa;
+    border-color: #87cefa;
+  }
+
+  /* DARK MODE FIX Growth & Rekomendasi – lama */
+  [data-theme="dark"] .card {
+    background: linear-gradient(145deg, #ffffff, #1e1e1e);
+    color: #110101;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  [data-theme="dark"] .card h6,
+  [data-theme="dark"] .card p,
+  [data-theme="dark"] .card span {
+    color: #140000 !important;
+  }
+
+  [data-theme="dark"] .card .border {
+    background: #2a2a2a !important;
+    border-color: rgba(255,255,255,0.1) !important;
+  }
+
+  [data-theme="dark"] .card .border:hover {
+    background: #333 !important;
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.1);
+  }
+
+  [data-theme="dark"] .card .text-success {
+    color: #6ee7b7 !important;
+  }
+
+  [data-theme="dark"] .card .text-danger {
+    color: #f87171 !important;
+  }
+
+  /* 🌙 Tabel Modal – Hitam Emas */
+  [data-theme="dark"] .modal .sertifikasi-table {
+    background-color: #0a0a0a !important;
+    color: #ffffff !important;
+    border: 2px solid #d4af37 !important;
+    border-collapse: collapse !important;
+  }
+
+  [data-theme="dark"] .modal .sertifikasi-table th,
+  [data-theme="dark"] .modal .sertifikasi-table td {
+    background-color: #0a0a0a !important;
+    border: 1px solid #d4af37 !important;
+    color: #f5f5f5 !important;
+  }
+
+  [data-theme="dark"] .modal .sertifikasi-table thead th {
+    background-color: #151515 !important;
+    color: #ffd700 !important;
+    border-bottom: 2px solid #d4af37 !important;
+  }
+
+  [data-theme="dark"] .modal .sertifikasi-table tbody tr:hover {
+    background-color: rgba(255, 215, 0, 0.12) !important;
+  }
+
+
+  /* =====================================================
+     FIX: Kota hitam → biru hover + tabel rata kiri
+     ===================================================== */
+  .kota-link {
+    color: #000 !important;
+    text-decoration: none !important;
+    font-weight: 500;
+  }
+  .kota-link:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+    cursor: pointer;
+  }
+  .table th,
+  .table td {
+    text-align: left !important;
+    vertical-align: middle !important;
+  }
+
+</style>
+
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3 col-lg-3">
+    <div class="stats-card">
+      <div class="card-title">Total Perusahaan</div>
+      <div class="stat-value text-primary">{{ total_perusahaan }}</div>
+      <button class="btn btn-sm btn-outline-primary mt-2" onclick="showRankingKota()">Ranking</button>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3 col-lg-3">
+    <div class="stats-card">
+      <div class="card-title">Total Sertifikat</div>
+      <div class="stat-value text-warning">{{ total_sertifikat }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3 col-lg-3">
+    <div class="stats-card">
+      <div class="card-title">Sertifikat Active</div>
+      <div class="stat-value text-success">{{ total_active }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3 col-lg-3">
+    <div class="stats-card">
+      <div class="card-title">Tren ISO</div>
+      <div class="fw-bold text-info">{{ tren_teratas }}</div>
+      <button class="btn btn-sm btn-outline-primary mt-2" onclick="openTrend()">Ranking</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Main Charts -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Jumlah Sertifikasi ISO</h6>
+        <div class="chart-container">
+          <canvas id="jenisChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Tren Sertifikasi</h6>
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Secondary Charts -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Jenis ISO</h6>
+        <div class="chart-container">
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Bidang Usaha</h6>
+        <div class="chart-container">
+          <canvas id="usahaChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Growth & Recommendations -->
+<div class="row g-3">
+  <div class="col-12 col-md-6 col-lg-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Growth ISO Naik</h6>
+        {% for iso in trend_up %}
+        <div class="mb-3 p-3 border rounded">
+          <h6 class="mb-1">{{ iso.jenis_iso }}</h6>
+          <span class="text-success fw-bold">
+            <i class="bi bi-arrow-up"></i> +{{ iso.percent }}%
+          </span>
+        </div>
+        {% else %}
+        <p class="text-muted">Tidak ada data naik</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6 col-lg-3">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Growth ISO Turun</h6>
+        {% for iso in trend_down %}
+        <div class="mb-3 p-3 border rounded">
+          <h6 class="mb-1">{{ iso.jenis_iso }}</h6>
+          <span class="text-danger fw-bold">
+            <i class="bi bi-arrow-down"></i> -{{ iso.percent }}%
+          </span>
+        </div>
+        {% else %}
+        <p class="text-muted">Tidak ada data turun</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Rekomendasi Bidang Usaha</h6>
+        <p><b>Bidang Usaha Terbanyak:</b> {{ rekomendasi_bidang_usaha.top.bidang_usaha }}</p>
+        <p><b>Bidang Usaha Terkecil:</b> {{ rekomendasi_bidang_usaha.bottom.bidang_usaha }} ({{ rekomendasi_bidang_usaha.bottom.total }})</p>
+        <p>{{ rekomendasi_bidang_usaha.marketing }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Tren -->
+<div class="modal fade" id="trendModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Tren ISO</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body table-responsive">
+        <table class="table sertifikasi-table table-striped table-bordered align-middle">
+          <thead>
+            <tr>
+              <th>Jenis ISO</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tren_iso %}
+            <tr>
+              <td>{{ t['jenis_iso'] }}</td>
+              <td>{{ t['total'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Ranking Modal -->
+<div class="modal fade" id="rankingModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ranking Perusahaan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body table-responsive">
+        {% if ranking_perusahaan %}
+        <table class="table sertifikasi-table table-striped table-bordered align-middle">
+          <thead>
+            <tr>
+              <th>Peringkat</th>
+              <th>Nama Client</th>
+              <th>Kota</th>
+              <th>Total Sertifikasi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in ranking_perusahaan %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ r.nama_client }}</td>
+              <td>{{ r.kota }}</td>
+              <td>{{ r.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center">Belum ada data ranking perusahaan</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function openTrend() {
+  $('#trendModal').modal('show');
+}
+
+/* ==========================================================
+   RANKING KOTA
+========================================================== */
+function showRankingKota() {
+  $.get("/dashboard/ranking_kota", function(data) {
+
+    let html = `
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Kota</th>
+            <th>Total Sertifikasi</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    data.forEach(row => {
+      html += `
+        <tr>
+          <td><a href="#" class="kota-link" data-kota="${encodeURIComponent(row.Kota)}">${row.Kota}</a></td>
+          <td>${row.total}</td>
+        </tr>
+      `;
+    });
+
+    html += "</tbody></table>";
+
+    Swal.fire({
+      title: "Ranking Kota",
+      html: html,
+      width: "800px",
+      didOpen: () => {
+        document.querySelectorAll('.kota-link').forEach(el => {
+          el.addEventListener('click', function(e) {
+            e.preventDefault();
+            const kota = decodeURIComponent(this.dataset.kota);
+            showDetailKota(kota);
+          });
+        });
+      }
+    });
+  });
+}
+
+
+/* ==========================================================
+    DETAIL KOTA
+========================================================== */
+function showDetailKota(kota) {
+
+  $.get("/dashboard/detail_kota/" + encodeURIComponent(kota), function(data) {
+
+    let html = `
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Nama Perusahaan</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    data.forEach(row => {
+      let badge = row.status === "Active"
+        ? `<span class="badge bg-success">Active</span>`
+        : `<span class="badge bg-danger">Deactive</span>`;
+
+      html += `
+        <tr>
+          <td>${row.nama_client}</td>
+          <td>${badge}</td>
+        </tr>
+      `;
+    });
+
+    html += "</tbody></table>";
+
+    Swal.fire({
+      title: "Detail Kota: " + kota,
+      html: html,
+      width: "800px"
+    });
+  });
+}
+
+
+/* ==========================================================
+   CHARTS
+========================================================== */
+new Chart(document.getElementById('jenisChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ jenis_labels|safe }}.map(l => l.length > 15 ? l.substring(0,15)+"…" : l),
+    datasets: [{ data: {{ jenis_data|safe }}, backgroundColor: '#0d6efd' }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+});
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ trend_labels|safe }},
+    datasets: [{ data: {{ trend_data|safe }}, backgroundColor: '#198754' }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+});
+
+new Chart(document.getElementById('donutChart'), {
+  type:'doughnut',
+  data:{
+    labels:{{ jenis_labels|safe }},
+    datasets:[{ data:{{ jenis_data|safe }}, backgroundColor:['#0d6efd','#198754','#ffc107','#dc3545','#6610f2','#fd7e14','#20c997','#6f42c1','#0dcaf0','#adb5bd']}]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }
+});
+
+new Chart(document.getElementById('usahaChart'), {
+  type:'bar',
+  data:{
+    labels:{{ usaha_labels|safe }},
+    datasets:[{ data:{{ usaha_data|safe }}, backgroundColor:['#0d6efd','#6610f2','#6f42c1','#d63384','#dc3545','#fd7e14','#ffc107','#198754','#20c997','#0dcaf0']}]
+  },
+  options:{
+    indexAxis:'y',
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{beginAtZero:true}}
+  }
+});
+</script>
+
+{% endblock %}
